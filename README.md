@@ -1,0 +1,2 @@
+# Pupa
+For trading bot
