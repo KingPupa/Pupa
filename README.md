@@ -1,2 +1,2 @@
 # Pupa
-For trading bot
+For tb
