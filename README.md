@@ -9,12 +9,15 @@ This script uses the Telethon library to listen for new messages in a specific T
     pip install -r requirements.txt
     ```
 
-2.  **Configure the script:**
-    Open `main.py` and replace the placeholder values with your own:
-    -   `'YOUR_API_ID'`: Your Telegram API ID.
-    -   `'YOUR_API_HASH'`: Your Telegram API hash.
-    -   `'YOUR_PHONE_NUMBER'`: Your phone number associated with your Telegram account (in international format, e.g., `+1234567890`).
-    -   `'YourGroupUsername'`: The username of the public Telegram group you want to listen to. For private groups, you may need to use the group's ID.
+2.  **Create your configuration file:**
+    Rename `config.example.json` to `config.json`.
+
+3.  **Update `config.json`:**
+    Open `config.json` and fill in your details:
+    -   `"api_id"`: Your Telegram API ID.
+    -   `"api_hash"`: Your Telegram API hash.
+    -   `"phone"`: Your phone number associated with your Telegram account (in international format, e.g., `+1234567890`).
+    -   `"group_username"`: The username of the public Telegram group you want to listen to. For private groups, you may need to use the group's ID.
 
     You can get your `api_id` and `api_hash` from [my.telegram.org](https://my.telegram.org).
 
