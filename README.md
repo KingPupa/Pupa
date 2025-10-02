@@ -1,6 +1,13 @@
-# Project TB Bot - Telegram Signal Trader
+# Project TB Safe Auto-Trader
 
-This script uses the Telethon library to listen for new messages in a list of specified Telegram groups. When a message matching a signal format (e.g., "BUY EURUSD 1m") is detected, it executes a trade on the Quotex platform using the `pyquotex` library.
+This script is an automated Telegram signal trader for the Quotex platform. It uses the Telethon library to monitor specified Telegram groups for trading signals and the `pyquotex` library to execute them. It includes safety features to limit trading frequency and maximum potential loss.
+
+## Features
+- **Automated Trading**: Listens to multiple Telegram groups and automatically places trades on Quotex when a valid signal is detected.
+- **Environment-based Configuration**: All sensitive credentials (Telegram and Quotex) are managed via a `.env` file for improved security.
+- **Safety Limits**:
+  - `MAX_TRADES_PER_HOUR`: Limits the number of trades the bot can place within a rolling one-hour window.
+  - `MAX_LOSS`: Stops the bot from trading if the total assumed loss for the session reaches a predefined limit. (Note: This is a conservative estimate, assuming every trade is a loss).
 
 ## Setup
 
@@ -10,37 +17,30 @@ This script uses the Telethon library to listen for new messages in a list of sp
     pip install -r requirements.txt
     ```
 
-2.  **Set Up Quotex Credentials:**
-    Create a `.env` file in the root of the project by copying the `.env.example` file.
+2.  **Set Up Credentials:**
+    Create a `.env` file by copying the example file:
     ```bash
     cp .env.example .env
     ```
-    Open the `.env` file and fill in your Quotex account details:
-    ```
-    QUOTEX_EMAIL="your_email@example.com"
-    QUOTEX_PASSWORD="your_quotex_password"
-    ```
+    Open the new `.env` file and fill in your credentials for both Telegram and Quotex.
 
-3.  **Configure Telegram and Trading Settings:**
-    Open the `project_tb_bot.py` file and edit the following values directly in the script:
-    -   `api_id`: Your Telegram API ID.
-    -   `api_hash`: Your Telegram API Hash.
-    -   `phone`: Your phone number associated with your Telegram account.
-    -   `telegram_groups`: A list of the Telegram group usernames you want to monitor.
+3.  **Configure Bot Settings:**
+    Open `project_tb_bot_safe_auto.py` and configure the following settings to your preference:
+    -   `telegram_groups`: A Python list of the Telegram group usernames you want to monitor (e.g., `['@GroupName1', '@GroupName2']`).
     -   `trade_amount`: The amount (in USD) to be used for each trade.
-
-    You can get your Telegram `api_id` and `api_hash` from [my.telegram.org](https://my.telegram.org).
+    -   `MAX_TRADES_PER_HOUR`: The maximum number of trades to execute in one hour.
+    -   `MAX_LOSS`: The maximum amount of money the bot is allowed to lose in a session before stopping.
 
 ## Usage
 
 Run the bot from your terminal:
 ```bash
-python project_tb_bot.py
+python project_tb_bot_safe_auto.py
 ```
 
 The first time you run the script, you will be prompted to enter your Telegram login details (phone number, password, and a login code sent to you by Telegram). After a successful login, a `project_tb_session.session` file will be created to store your session, so you won't have to log in again.
 
-The bot will then connect to Quotex and start listening for messages in the specified Telegram groups. When a valid signal is detected, it will attempt to execute a trade.
+The bot will then connect to Quotex and start listening for messages. When a valid signal is detected and safety limits have not been reached, it will attempt to execute a trade.
 
 ### Disclaimer
 Trading carries a high level of risk and may not be suitable for all investors. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite. The possibility exists that you could sustain a loss of some or all of your initial investment. You should be aware of all the risks associated with trading and seek advice from an independent financial advisor if you have any doubts. This script is for educational purposes only and is not financial advice. Use at your own risk.
