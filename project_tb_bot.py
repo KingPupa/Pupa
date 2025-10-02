@@ -152,13 +152,20 @@ async def main():
     try:
         balance = quotex.get_balance()
         starting_balance = float(balance)
-        print(f"[SUCCESS] Logged into Quotex as {EMAIL} | Balance: ${balance}")
+
+        # Mask email for safety
+        masked_email = EMAIL[:3] + "****" + EMAIL[EMAIL.find("@"):]
+        print(f"[SUCCESS] Logged into Quotex as {masked_email} | Balance: ${balance}")
     except Exception as e:
         print("[ERROR] Could not log in to Quotex:", e)
         return
 
+    # Mask phone number for safety
+    masked_phone = phone[:5] + "****" + phone[-2:]
+    print(f"[INFO] Telegram session starting for {masked_phone}")
+
     await client.start(phone)
-    print("[INFO] Project TB Bot is running on dev_testing branch...")
+    print("[INFO] Project TB Bot is running...")
 
     asyncio.create_task(balance_monitor())
     asyncio.create_task(daily_reset())
