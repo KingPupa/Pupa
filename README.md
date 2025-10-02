@@ -30,4 +30,16 @@ python main.py
 
 The first time you run the script, you will be prompted to enter your phone number, password (if you have one), and a login code sent to you by Telegram. After a successful login, a `session_name.session` file will be created. This file stores your session, so you won't have to log in again.
 
-Once running, the script will print "New Signal:" followed by the message text for every new message in the specified group.
+Once running, the script will listen for messages in the specified group. If a message is a valid signal (composed of three parts: action, asset, and duration), it will be parsed and printed in a structured format.
+
+### Example Output
+
+For a valid signal like `"BUY BTC 1h"`, the output will be:
+```
+New Signal Received:
+  Action: BUY
+  Asset: BTC
+  Duration: 1h
+```
+
+If a message cannot be parsed, the script will print the original message, indicating that it could not be parsed.

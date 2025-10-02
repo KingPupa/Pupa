@@ -19,11 +19,27 @@ except KeyError as e:
 # Create client
 client = TelegramClient('session_name', api_id, api_hash)
 
+def parse_signal(message):
+    """Parses a signal message into action, asset, and duration."""
+    parts = message.split()
+    if len(parts) == 3:
+        action, asset, duration = parts
+        return action, asset, duration
+    return None, None, None
+
 @client.on(events.NewMessage(chats=group_username))
 async def handler(event):
-    """Listens for new messages in a specific chat and prints them."""
-    message = event.message.message
-    print("New Signal:", message)
+    """Listens for new messages, parses them, and prints the structured data."""
+    message_text = event.message.message
+    action, asset, duration = parse_signal(message_text)
+
+    if action:
+        print(f"New Signal Received:")
+        print(f"  Action: {action}")
+        print(f"  Asset: {asset}")
+        print(f"  Duration: {duration}")
+    else:
+        print(f"Received a message that could not be parsed: {message_text}")
 
 async def main():
     """Starts the Telegram client."""
