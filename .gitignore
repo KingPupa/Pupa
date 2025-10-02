@@ -1,0 +1,8 @@
+# Telethon session file
+session_name.session
+
+# Configuration file
+config.json
+
+# Log files
+*.log
