@@ -26,7 +26,14 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
     ```
     Open the new `.env` file and fill in your credentials for both Telegram and Quotex.
 
-3.  **Configure Bot Settings:**
+3.  **Verify Quotex Login (Optional but Recommended):**
+    Before running the main bot, you can verify that your Quotex credentials are correct by running the `check_login.py` script:
+    ```bash
+    python check_login.py
+    ```
+    If successful, it will print your current account balance. If not, it will print an error, and you should double-check your `.env` file.
+
+4.  **Configure Bot Settings:**
     Open `project_tb_bot_final.py` and configure the following settings to your preference:
     -   `telegram_groups`: A Python list of the Telegram group usernames you want to monitor (e.g., `['@GroupName1', '@GroupName2']`).
     -   `trade_amount`: The amount (in USD) to be used for each trade.
