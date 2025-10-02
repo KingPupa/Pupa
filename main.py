@@ -8,9 +8,8 @@ try:
     api_id = config['api_id']
     api_hash = config['api_hash']
     phone = config['phone']
-    group_username = config['group_username']
 except FileNotFoundError:
-    print("Error: config.json not found. Please create it from config.example.json.")
+    print("Error: config.json not found. Please create it.")
     exit()
 except KeyError as e:
     print(f"Error: Missing key in config.json: {e}")
@@ -27,19 +26,22 @@ def parse_signal(message):
         return action, asset, duration
     return None, None, None
 
-@client.on(events.NewMessage(chats=group_username))
-async def handler(event):
-    """Listens for new messages, parses them, and prints the structured data."""
-    message_text = event.message.message
-    action, asset, duration = parse_signal(message_text)
+def execute_trade(action, asset, duration, amount):
+    """Placeholder function to execute a trade."""
+    # In a real application, this would connect to a broker's API.
+    print(f"--- EXECUTING TRADE ---")
+    print(f"  Action: {action}")
+    print(f"  Asset: {asset}")
+    print(f"  Duration: {duration}")
+    print(f"  Amount: ${amount}")
+    print(f"-----------------------")
 
+@client.on(events.NewMessage(chats='YourGroupUsername'))
+async def handler(event):
+    message = event.message.message
+    action, asset, duration = parse_signal(message)
     if action:
-        print(f"New Signal Received:")
-        print(f"  Action: {action}")
-        print(f"  Asset: {asset}")
-        print(f"  Duration: {duration}")
-    else:
-        print(f"Received a message that could not be parsed: {message_text}")
+        execute_trade(action, asset, duration, amount=1)  # test amount
 
 async def main():
     """Starts the Telegram client."""
