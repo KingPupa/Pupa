@@ -1,33 +1,31 @@
-# project_tb_bot_final.py
+# project_tb_bot.py
 from telethon import TelegramClient, events
 from pyquotex import Quotex
 from dotenv import load_dotenv
 import os
 import asyncio
 import time
-import json
+import datetime
 
 # ----------------------------
 # LOAD ENV VARIABLES
 # ----------------------------
 load_dotenv()
 
-# ----------------------------
-# FETCH TELEGRAM CREDENTIALS
-# ----------------------------
 api_id = os.getenv("TELEGRAM_API_ID")
 api_hash = os.getenv("TELEGRAM_API_HASH")
 phone = os.getenv("TELEGRAM_PHONE")
 
+EMAIL = os.getenv("QUOTEX_EMAIL")
+PASSWORD = os.getenv("QUOTEX_PASSWORD")
+
 # ----------------------------
 # CONNECT TO QUOTEX
 # ----------------------------
-EMAIL = os.getenv("QUOTEX_EMAIL")
-PASSWORD = os.getenv("QUOTEX_PASSWORD")
 quotex = Quotex(email=EMAIL, password=PASSWORD)
 
 # ----------------------------
-# BOT CONFIG
+# TELEGRAM CONFIG
 # ----------------------------
 telegram_groups = ['@Binary_Bosss', '@Quotex_SuperBot', '@QuotexOTCHACK']
 trade_amount = 1  # $1 per trade for testing
@@ -37,7 +35,9 @@ trade_amount = 1  # $1 per trade for testing
 # ----------------------------
 MAX_TRADES_PER_HOUR = 20
 MAX_LOSS = 50
+current_loss = 0
 trade_log = []
+starting_balance = None
 
 # ----------------------------
 # TELEGRAM CLIENT
@@ -51,12 +51,11 @@ def parse_signal(message):
     parts = message.strip().split()
     if len(parts) == 3:
         action, asset, duration = parts
-        action = action.upper()
-        return action, asset, duration
+        return action.upper(), asset, duration
     return None, None, None
 
 # ----------------------------
-# BALANCE & P/L TRACKING
+# BALANCE / P&L TRACKING
 # ----------------------------
 def get_balance():
     try:
@@ -66,61 +65,45 @@ def get_balance():
         print("[ERROR] Could not fetch balance:", e)
         return None
 
-starting_balance = get_balance()
-
 # ----------------------------
-# TRADE EXECUTION WITH SAFETY AND P/L
+# TRADE EXECUTION
 # ----------------------------
 def can_trade():
-    """Checks if safety limits (max trades and max loss) have been reached."""
-    global trade_log, starting_balance
-
-    # 1. Check for max loss
-    current_balance = get_balance()
-    if current_balance is not None and starting_balance is not None:
-        loss = starting_balance - current_balance
-        if loss >= MAX_LOSS:
-            print(f"[SAFETY] MAX LOSS of ${MAX_LOSS} reached. Current session loss: ${loss:.2f}. Stopping trades.")
-            return False
-
-    # 2. Check for max trades per hour
     current_time = time.time()
-    trade_log = [t for t in trade_log if current_time - t < 3600]  # 1 hour window
-    if len(trade_log) >= MAX_TRADES_PER_HOUR:
-        print(f"[SAFETY] MAX TRADES PER HOUR ({MAX_TRADES_PER_HOUR}) reached. Pausing trades.")
-        return False
-
-    return True
+    global trade_log
+    trade_log = [t for t in trade_log if current_time - t < 3600]  # last 1 hour
+    return len(trade_log) < MAX_TRADES_PER_HOUR
 
 def execute_trade(action, asset, duration, amount, retries=3):
-    """Executes a trade after checking safety limits, with retries."""
-    global trade_log
-
+    global current_loss, starting_balance
+    if current_loss >= MAX_LOSS:
+        print("[ALERT] Stop-loss triggered. No more trades until reset.")
+        return
     if not can_trade():
+        print("[WARN] Max trades per hour reached. Skipping trade.")
         return
 
     attempt = 0
     while attempt < retries:
         try:
-            side = 1 if action.upper() == "BUY" else 0
+            pre_balance = get_balance()
+            side = 1 if action == "BUY" else 0
             response = quotex.buy(amount=amount, asset=asset, direction=side, duration=duration)
-            print(f"[TRADE] {action} {asset} {duration} ${amount} | Response: {response}")
             trade_log.append(time.time())
 
-            # Log current P/L after a successful trade
-            current_balance = get_balance()
-            if current_balance is not None and starting_balance is not None:
-                total_pl = current_balance - starting_balance
-                print(f"[INFO] Total session P/L: ${total_pl:.2f}")
+            post_balance = get_balance()
+            if pre_balance and post_balance:
+                trade_pl = post_balance - pre_balance
+                current_loss += max(0, -trade_pl)
+                total_pl = post_balance - starting_balance
+                print(f"[INFO] Trade P/L: ${trade_pl:.2f} | Total P/L: ${total_pl:.2f}")
 
-            return # Exit the loop on success
+            print(f"[TRADE] {action} {asset} {duration} ${amount} | Response: {response}")
+            return
         except Exception as e:
             attempt += 1
-            print(f"[WARN] Trade attempt {attempt}/{retries} failed: {e}")
-            if attempt < retries:
-                time.sleep(1) # Wait a second before retrying
-
-    print(f"[ERROR] All {retries} trade attempts failed for {action} {asset}. Skipping trade.")
+            print(f"[WARN] Trade attempt {attempt} failed: {e}")
+    print("[ERROR] All retries failed. Skipping trade.")
 
 # ----------------------------
 # TELEGRAM EVENT HANDLER
@@ -144,25 +127,41 @@ async def balance_monitor(interval=300):
         balance = get_balance()
         if balance is not None and starting_balance is not None:
             total_pl = balance - starting_balance
-            print(f"[BALANCE] Current balance: ${balance:.2f} | Session P/L: ${total_pl:.2f}")
+            print(f"[BALANCE] Current: ${balance:.2f} | Session P/L: ${total_pl:.2f}")
         await asyncio.sleep(interval)
+
+# ----------------------------
+# DAILY RESET TASK
+# ----------------------------
+async def daily_reset():
+    global current_loss, starting_balance
+    while True:
+        now = datetime.datetime.now()
+        next_reset = (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        wait_time = (next_reset - now).total_seconds()
+        await asyncio.sleep(wait_time)
+        current_loss = 0
+        starting_balance = get_balance()
+        print("[RESET] Daily stop-loss and P/L tracking reset.")
 
 # ----------------------------
 # RUN BOT
 # ----------------------------
 async def main():
-    if starting_balance is None:
-        print("[ERROR] Could not fetch initial balance. Exiting.")
+    global starting_balance
+    try:
+        balance = quotex.get_balance()
+        starting_balance = float(balance)
+        print(f"[SUCCESS] Logged into Quotex as {EMAIL} | Balance: ${balance}")
+    except Exception as e:
+        print("[ERROR] Could not log in to Quotex:", e)
         return
 
-    print(f"[INFO] Initial balance: ${starting_balance:.2f}. Starting bot...")
-
     await client.start(phone)
-    print("[INFO] Project TB Bot is running with safety and P/L tracking...")
+    print("[INFO] Project TB Bot is running on dev_testing branch...")
 
-    # Start background balance monitor
     asyncio.create_task(balance_monitor())
-
+    asyncio.create_task(daily_reset())
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
