@@ -1,21 +1,25 @@
 from telethon import TelegramClient, events
 
 # Configuration
-api_id = 26243332
-api_hash = "2d0ec7dc609caca15b573fc2d5239424"
-phone = "+254701022662"
+# Replace with your own values
+api_id = 'YOUR_API_ID'
+api_hash = 'YOUR_API_HASH'
+phone = 'YOUR_PHONE_NUMBER'
 
 # Create client
-client = TelegramClient("session_name", api_id, api_hash)
+client = TelegramClient('session_name', api_id, api_hash)
 
-@client.on(events.NewMessage)
+@client.on(events.NewMessage(chats='YourGroupUsername'))
 async def handler(event):
-    sender = await event.get_sender()
-    print(f"[{event.date}] {sender.id} -> {event.raw_text}")
+    """Listens for new messages in a specific chat and prints them."""
+    message = event.message.message
+    print("New Signal:", message)
 
 async def main():
-    await client.start(phone)  # will ask for your login code first time
-    print("✅ Telegram listener started... Waiting for messages.")
+    """Starts the Telegram client."""
+    # You will be asked for your phone number, password, and a login code the first time.
+    await client.start(phone)
+    print("✅ Client started. Waiting for messages...")
     await client.run_until_disconnected()
 
 with client:
