@@ -34,13 +34,46 @@ trade_amount = 1  # $1 per trade for testing
 # ----------------------------
 MAX_TRADES_PER_HOUR = 20
 MAX_LOSS = 50
-current_loss = 0
+initial_balance = None  # Will be set at startup
 trade_log = []
 
 # ----------------------------
 # TELEGRAM CLIENT
 # ----------------------------
 client = TelegramClient('project_tb_session', TELEGRAM_API_ID, TELEGRAM_API_HASH)
+
+# ----------------------------
+# BALANCE & SAFETY FUNCTIONS
+# ----------------------------
+def get_balance():
+    """Fetches the current account balance from Quotex."""
+    try:
+        balance = quotex.get_balance()
+        return float(balance)
+    except Exception as e:
+        print("[ERROR] Could not fetch balance:", e)
+        return None
+
+def can_trade():
+    """Checks if safety limits have been reached."""
+    global trade_log, initial_balance
+
+    # 1. Check for max loss based on real-time balance
+    current_balance = get_balance()
+    if current_balance is not None and initial_balance is not None:
+        loss = initial_balance - current_balance
+        if loss >= MAX_LOSS:
+            print(f"[SAFETY] MAX LOSS of ${MAX_LOSS} reached. Current session loss: ${loss:.2f}. Stopping trades.")
+            return False
+
+    # 2. Check for max trades per hour
+    current_time = time.time()
+    trade_log = [t for t in trade_log if current_time - t < 3600] # 1 hour window
+    if len(trade_log) >= MAX_TRADES_PER_HOUR:
+        print(f"[SAFETY] MAX TRADES PER HOUR ({MAX_TRADES_PER_HOUR}) reached. Pausing trades.")
+        return False
+
+    return True
 
 # ----------------------------
 # SIGNAL PARSER
@@ -55,33 +88,11 @@ def parse_signal(message):
     return None, None, None
 
 # ----------------------------
-# SAFETY CHECK
-# ----------------------------
-def can_trade():
-    """Checks if safety limits have been reached."""
-    global current_loss, trade_log
-
-    # 1. Check for max loss
-    if current_loss >= MAX_LOSS:
-        print(f"[SAFETY] MAX LOSS of ${MAX_LOSS} reached. Stopping trades.")
-        return False
-
-    # 2. Check for max trades per hour
-    current_time = time.time()
-    # Filter out trades older than an hour (3600 seconds)
-    trade_log = [t for t in trade_log if current_time - t < 3600]
-    if len(trade_log) >= MAX_TRADES_PER_HOUR:
-        print(f"[SAFETY] MAX TRADES PER HOUR ({MAX_TRADES_PER_HOUR}) reached. Pausing trades.")
-        return False
-
-    return True
-
-# ----------------------------
 # TRADE EXECUTION
 # ----------------------------
 def execute_trade(action, asset, duration, amount):
     """Executes a trade on Quotex after checking safety limits."""
-    global current_loss, trade_log
+    global trade_log
 
     if not can_trade():
         return
@@ -90,13 +101,7 @@ def execute_trade(action, asset, duration, amount):
         side = 1 if action.upper() == "BUY" else 0
         response = quotex.buy(amount=amount, asset=asset, direction=side, duration=duration)
         print(f"[TRADE] {action} {asset} {duration} ${amount} | Response: {response}")
-
-        # Log the trade for safety checks
         trade_log.append(time.time())
-        # Assume a loss for conservative safety
-        current_loss += amount
-        print(f"[INFO] Current assumed loss: ${current_loss}")
-
     except Exception as e:
         print("[ERROR] Trade failed:", e)
 
@@ -118,6 +123,14 @@ async def handle_new_signal(event):
 # RUN BOT
 # ----------------------------
 async def main():
+    global initial_balance
+    initial_balance = get_balance()
+    if initial_balance is None:
+        print("[ERROR] Could not fetch initial balance. Exiting.")
+        return
+
+    print(f"[INFO] Initial balance: ${initial_balance:.2f}. Starting bot...")
+
     await client.start(TELEGRAM_PHONE)
     print("[INFO] Project TB Safe Auto Bot is running...")
     await client.run_until_disconnected()

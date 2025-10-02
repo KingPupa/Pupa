@@ -7,7 +7,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
 - **Environment-based Configuration**: All sensitive credentials (Telegram and Quotex) are managed via a `.env` file for improved security.
 - **Safety Limits**:
   - `MAX_TRADES_PER_HOUR`: Limits the number of trades the bot can place within a rolling one-hour window.
-  - `MAX_LOSS`: Stops the bot from trading if the total assumed loss for the session reaches a predefined limit. (Note: This is a conservative estimate, assuming every trade is a loss).
+  - `MAX_LOSS`: Stops the bot from trading if the real-time account balance drops below the starting balance by this amount. This provides an accurate, real-time stop-loss for the session.
 
 ## Setup
 
