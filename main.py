@@ -1,13 +1,9 @@
 from telethon import TelegramClient, events
-import json
 
-# Load config
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-api_id = config["api_id"]
-api_hash = config["api_hash"]
-phone = config["phone"]
+# Configuration
+api_id = 26243332
+api_hash = "2d0ec7dc609caca15b573fc2d5239424"
+phone = "+254701022662"
 
 # Create client
 client = TelegramClient("session_name", api_id, api_hash)

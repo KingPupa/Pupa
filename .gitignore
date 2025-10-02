@@ -1,8 +1,7 @@
 # Telethon session file
 session_name.session
 
-# Configuration file
-config.json
+# No longer needed, as credentials are now embedded in the script.
 
 # Log files
 *.log
