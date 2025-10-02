@@ -1,11 +1,11 @@
-# Project TB Safe Auto-Trader
+# Project TB Final Auto-Trader
 
 This script is an automated Telegram signal trader for the Quotex platform. It uses the Telethon library to monitor specified Telegram groups for trading signals and the `pyquotex` library to execute them. It includes safety features to limit trading frequency and maximum potential loss.
 
 ## Features
 - **Automated Trading**: Listens to multiple Telegram groups and automatically places trades on Quotex when a valid signal is detected.
 - **Environment-based Configuration**: All sensitive credentials (Telegram and Quotex) are managed via a `.env` file for improved security.
-- **Periodic Balance Monitoring**: Prints the current account balance to the console every 5 minutes (by default) to keep you informed.
+- **Periodic Balance & P/L Monitoring**: Prints the current account balance and the total session profit/loss to the console every 5 minutes (by default).
 - **Trade Retries**: Automatically retries a failed trade a configurable number of times, making the bot more resilient to temporary API errors.
 - **Safety Limits**:
   - `MAX_TRADES_PER_HOUR`: Limits the number of trades the bot can place within a rolling one-hour window.
@@ -27,7 +27,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
     Open the new `.env` file and fill in your credentials for both Telegram and Quotex.
 
 3.  **Configure Bot Settings:**
-    Open `project_tb_bot_safe_auto.py` and configure the following settings to your preference:
+    Open `project_tb_bot_final.py` and configure the following settings to your preference:
     -   `telegram_groups`: A Python list of the Telegram group usernames you want to monitor (e.g., `['@GroupName1', '@GroupName2']`).
     -   `trade_amount`: The amount (in USD) to be used for each trade.
     -   `TRADE_RETRIES`: The number of times to retry a failed trade attempt.
@@ -38,7 +38,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
 
 Run the bot from your terminal:
 ```bash
-python project_tb_bot_safe_auto.py
+python project_tb_bot_final.py
 ```
 
 The first time you run the script, you will be prompted to enter your Telegram login details (phone number, password, and a login code sent to you by Telegram). After a successful login, a `project_tb_session.session` file will be created to store your session, so you won't have to log in again.
