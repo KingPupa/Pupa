@@ -5,6 +5,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
 ## Features
 - **Automated Trading**: Listens to multiple Telegram groups and automatically places trades on Quotex when a valid signal is detected.
 - **Environment-based Configuration**: All sensitive credentials (Telegram and Quotex) are managed via a `.env` file for improved security.
+- **Periodic Balance Monitoring**: Prints the current account balance to the console every 5 minutes (by default) to keep you informed.
 - **Trade Retries**: Automatically retries a failed trade a configurable number of times, making the bot more resilient to temporary API errors.
 - **Safety Limits**:
   - `MAX_TRADES_PER_HOUR`: Limits the number of trades the bot can place within a rolling one-hour window.

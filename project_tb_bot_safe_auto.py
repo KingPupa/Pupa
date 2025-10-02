@@ -138,6 +138,17 @@ async def handle_new_signal(event):
         print("[WARN] Could not parse signal:", message)
 
 # ----------------------------
+# BALANCE MONITOR
+# ----------------------------
+async def balance_monitor(interval=300):
+    """Periodically fetches and prints the account balance."""
+    while True:
+        balance = get_balance()
+        if balance is not None:
+            print(f"[BALANCE] Current account balance: ${balance:.2f}")
+        await asyncio.sleep(interval)
+
+# ----------------------------
 # RUN BOT
 # ----------------------------
 async def main():
@@ -151,7 +162,12 @@ async def main():
 
     await client.start(TELEGRAM_PHONE)
     print("[INFO] Project TB Safe Auto Bot is running...")
-    await client.run_until_disconnected()
+
+    # Run the client and the balance monitor concurrently
+    await asyncio.gather(
+        client.run_until_disconnected(),
+        balance_monitor()
+    )
 
 if __name__ == "__main__":
     asyncio.run(main())
