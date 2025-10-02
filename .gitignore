@@ -1,8 +1,11 @@
-# Session file
-session_name.session
+# Environment variables
+.env
 
-# Configuration file
-config.json
+# Session files
+*.session
 
-# Log files
-*.log
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

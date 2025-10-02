@@ -1,51 +1,46 @@
-# Telegram Group Signal Listener & Trader
+# Project TB Bot - Telegram Signal Trader
 
-This script uses the Telethon library to listen for new messages in a specific Telegram group, parses them as trading signals, and executes a placeholder trade.
+This script uses the Telethon library to listen for new messages in a list of specified Telegram groups. When a message matching a signal format (e.g., "BUY EURUSD 1m") is detected, it executes a trade on the Quotex platform using the `pyquotex` library.
 
 ## Setup
 
-1.  **Install dependencies:**
+1.  **Install Dependencies:**
+    Make sure you have Python installed. Then, install the required libraries using the `requirements.txt` file:
     ```bash
     pip install -r requirements.txt
     ```
 
-2.  **Create your configuration file:**
-    Rename `config.example.json` to `config.json`.
+2.  **Set Up Quotex Credentials:**
+    Create a `.env` file in the root of the project by copying the `.env.example` file.
+    ```bash
+    cp .env.example .env
+    ```
+    Open the `.env` file and fill in your Quotex account details:
+    ```
+    QUOTEX_EMAIL="your_email@example.com"
+    QUOTEX_PASSWORD="your_quotex_password"
+    ```
 
-3.  **Update `config.json`:**
-    Open `config.json` and fill in your API details:
-    -   `"api_id"`: Your Telegram API ID.
-    -   `"api_hash"`: Your Telegram API hash.
-    -   `"phone"`: Your phone number associated with your Telegram account (in international format, e.g., `+1234567890`).
+3.  **Configure Telegram and Trading Settings:**
+    Open the `project_tb_bot.py` file and edit the following values directly in the script:
+    -   `api_id`: Your Telegram API ID.
+    -   `api_hash`: Your Telegram API Hash.
+    -   `phone`: Your phone number associated with your Telegram account.
+    -   `telegram_groups`: A list of the Telegram group usernames you want to monitor.
+    -   `trade_amount`: The amount (in USD) to be used for each trade.
 
-    You can get your `api_id` and `api_hash` from [my.telegram.org](https://my.telegram.org).
-
-4.  **Configure Target Group and Trade Amount:**
-    Open `main.py` and edit the following values directly in the script:
-    -   In the `@client.on(events.NewMessage(chats='YourGroupUsername'))` line, replace `'YourGroupUsername'` with the username of the target group.
-    -   In the `handler` function, find the `execute_trade(...)` call and change `amount=1` to your desired test trade amount.
+    You can get your Telegram `api_id` and `api_hash` from [my.telegram.org](https://my.telegram.org).
 
 ## Usage
 
-Run the script from your terminal:
+Run the bot from your terminal:
 ```bash
-python main.py
+python project_tb_bot.py
 ```
 
-The first time you run the script, you will be prompted for your login details. After a successful login, a `session_name.session` file will be created to store your session.
+The first time you run the script, you will be prompted to enter your Telegram login details (phone number, password, and a login code sent to you by Telegram). After a successful login, a `project_tb_session.session` file will be created to store your session, so you won't have to log in again.
 
-Once running, the script will listen for messages. If a message is a valid signal (e.g., `"BUY BTC 1h"`), it will be parsed, and a trade will be executed.
+The bot will then connect to Quotex and start listening for messages in the specified Telegram groups. When a valid signal is detected, it will attempt to execute a trade.
 
-### Example Output
-
-For a valid signal like `"BUY BTC 1h"`, the output will be:
-```
---- EXECUTING TRADE ---
-  Action: BUY
-  Asset: BTC
-  Duration: 1h
-  Amount: $1
------------------------
-```
-
-If a message cannot be parsed, no output will be generated.
+### Disclaimer
+Trading carries a high level of risk and may not be suitable for all investors. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite. The possibility exists that you could sustain a loss of some or all of your initial investment. You should be aware of all the risks associated with trading and seek advice from an independent financial advisor if you have any doubts. This script is for educational purposes only and is not financial advice. Use at your own risk.
