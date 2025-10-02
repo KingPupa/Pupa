@@ -28,6 +28,7 @@ quotex = Quotex(email=QUOTEX_EMAIL, password=QUOTEX_PASSWORD)
 # ----------------------------
 telegram_groups = ['@Binary_Bosss', '@Quotex_SuperBot', '@QuotexOTCHACK']
 trade_amount = 1  # $1 per trade for testing
+TRADE_RETRIES = 3 # Number of times to retry a failed trade
 
 # ----------------------------
 # SAFETY SETTINGS
@@ -90,20 +91,37 @@ def parse_signal(message):
 # ----------------------------
 # TRADE EXECUTION
 # ----------------------------
-def execute_trade(action, asset, duration, amount):
-    """Executes a trade on Quotex after checking safety limits."""
-    global trade_log
+def execute_trade(action, asset, duration, amount, retries=TRADE_RETRIES):
+    """Executes a trade on Quotex after checking safety limits, with retries."""
+    global trade_log, initial_balance
 
     if not can_trade():
         return
 
-    try:
-        side = 1 if action.upper() == "BUY" else 0
-        response = quotex.buy(amount=amount, asset=asset, direction=side, duration=duration)
-        print(f"[TRADE] {action} {asset} {duration} ${amount} | Response: {response}")
-        trade_log.append(time.time())
-    except Exception as e:
-        print("[ERROR] Trade failed:", e)
+    attempt = 0
+    while attempt < retries:
+        try:
+            side = 1 if action.upper() == "BUY" else 0
+            response = quotex.buy(amount=amount, asset=asset, direction=side, duration=duration)
+            print(f"[TRADE] {action} {asset} {duration} ${amount} | Response: {response}")
+
+            trade_log.append(time.time())
+
+            # Log current P/L after a successful trade
+            current_balance = get_balance()
+            if current_balance is not None and initial_balance is not None:
+                total_pl = current_balance - initial_balance
+                print(f"[INFO] Total session P/L: ${total_pl:.2f}")
+
+            return # Exit the loop on success
+        except Exception as e:
+            attempt += 1
+            print(f"[WARN] Trade attempt {attempt}/{retries} failed: {e}")
+            if attempt < retries:
+                time.sleep(1) # Wait a second before retrying
+
+    print(f"[ERROR] All {retries} trade attempts failed for {action} {asset}. Skipping trade.")
+
 
 # ----------------------------
 # TELEGRAM EVENT HANDLER

@@ -5,6 +5,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
 ## Features
 - **Automated Trading**: Listens to multiple Telegram groups and automatically places trades on Quotex when a valid signal is detected.
 - **Environment-based Configuration**: All sensitive credentials (Telegram and Quotex) are managed via a `.env` file for improved security.
+- **Trade Retries**: Automatically retries a failed trade a configurable number of times, making the bot more resilient to temporary API errors.
 - **Safety Limits**:
   - `MAX_TRADES_PER_HOUR`: Limits the number of trades the bot can place within a rolling one-hour window.
   - `MAX_LOSS`: Stops the bot from trading if the real-time account balance drops below the starting balance by this amount. This provides an accurate, real-time stop-loss for the session.
@@ -28,6 +29,7 @@ This script is an automated Telegram signal trader for the Quotex platform. It u
     Open `project_tb_bot_safe_auto.py` and configure the following settings to your preference:
     -   `telegram_groups`: A Python list of the Telegram group usernames you want to monitor (e.g., `['@GroupName1', '@GroupName2']`).
     -   `trade_amount`: The amount (in USD) to be used for each trade.
+    -   `TRADE_RETRIES`: The number of times to retry a failed trade attempt.
     -   `MAX_TRADES_PER_HOUR`: The maximum number of trades to execute in one hour.
     -   `MAX_LOSS`: The maximum amount of money the bot is allowed to lose in a session before stopping.
 
