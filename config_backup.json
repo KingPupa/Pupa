@@ -1,0 +1,51 @@
+{
+  "api_id": 26243332,
+  "api_hash": "2d0ec7dc609caca15b573fc2d5239424",
+  "phone": "+254701022662",
+  "groups": ["Binary_Bosss","Quotex_SuperBot","QuotexOTCHACK"],
+  "trade_amount": 20,
+  "use_real_broker": false,
+  "martingale": true,
+  "martingale_multiplier": 2,
+  "max_martingale_steps": 5,
+  "max_trades_per_day": 30,
+  "daily_profit_target": 100,
+  "daily_loss_limit": -50
+}{
+  "api_id": 26243332,
+  "api_hash": "2d0ec7dc609caca15b573fc2d5239424",
+  "phone": "+254701022662",
+  "groups": ["Binary_Bosss","Quotex_SuperBot","QuotexOTCHACK"],
+  "trade_amount": 20,
+  "use_real_broker": false,
+  "martingale": false,
+  "max_trades_per_day": 30
+}
+{
+  "api_id": 26243332,
+  "api_hash": "2d0ec7dc609caca15b573fc2d5239424",
+  "phone": "+254701022662",
+  "groups": ["Binary_Bosss","Quotex_SuperBot","QuotexOTCHACK"],
+  "trade_amount": 20,
+  "use_real_broker": false,
+  "martingale": true,
+  "martingale_multiplier": 2,
+  "max_martingale_steps": 5,
+  "max_trades_per_day": 30,
+  "daily_profit_target": 100,
+  "daily_loss_limit": -50
+}
+{
+  "api_id": 26243332,
+  "api_hash": "2d0ec7dc609caca15b573fc2d5239424",
+  "phone": "+254701022662",
+  "groups": ["Binary_Bosss","Quotex_SuperBot","QuotexOTCHACK"],
+  "trade_amount": 20,
+  "use_real_broker": false,
+  "martingale": false,
+  "max_trades_per_day": 30,
+  "martingale_multiplier": 2,
+  "max_martingale_steps": 5,
+  "daily_profit_target": 100,
+  "daily_loss_limit": -50
+}
