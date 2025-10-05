@@ -26,3 +26,10 @@ update_credentials.p
 main_backup.py
 main_broken.py
 config_backup.json
+.env
+*.session
+*.log
+*.csv
+*.pyo
+*.pyoo
+bot.pid
