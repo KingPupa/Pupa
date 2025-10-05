@@ -1,0 +1,28 @@
+# Environment variables
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyooxy
+*.pyoo
+
+# Logs and temporary files
+*.log
+*.pid
+*.txt
+*.csv
+
+# Session and credentials files
+*.session
+session_name.session
+update_credentials.p
+
+# Shell scripts (optional if you don’t want to track them)
+*.sh
+
+# Backup files
+main_backup.py
+main_broken.py
+config_backup.json
